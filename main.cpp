@@ -123,11 +123,11 @@ int main(){
     });
 
 
-        printContainer(house, "House");
-        std::cout << "Size house: " << house.size() << std::endl;
-        auto highScore = std::max_element( house.begin(), house.end() );
-        std::cout << "High score: " << *highScore << std::endl;
-        house.erase(highScore);
+    printContainer(house, "House");
+    std::cout << "Size house: " << house.size() << std::endl;
+    auto highScore = std::max_element( house.begin(), house.end() );
+    std::cout << "High score: " << *highScore << std::endl;
+    house.erase(highScore);
 
 
 
