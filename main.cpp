@@ -3,6 +3,7 @@
 #include <thread>
 #include <vector>
 #include <chrono>
+#include <cmath>
 
 static std::mutex m;
 
@@ -29,6 +30,28 @@ void tJoin(std::vector<std::thread> &workers){
     }
 }
 
+bool isPrime(int n) {
+    if (n % 2 == 0) return n == 2;
+    if (n % 3 == 0) return n == 3;
+    int step = 4, m = (int)sqrt(n) + 1;
+    for(int i = 5; i < m; step = 6-step, i += step) {
+        if (n % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+int nthPrime(int n) {
+    int candidate, count;
+    for(candidate = 2, count = 0; count < n; ++candidate) {
+        if (isPrime(candidate)) {
+            ++count;
+        }
+    }
+    return candidate-1;
+}
+
 void task_1(){
     std::vector<std::thread> workers_cout;
     std::vector<std::thread> workers_pcout;
@@ -48,7 +71,7 @@ void task_1(){
     tJoin(workers_cout);
 
     worker = 0;
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     std::cout << "With pcout():" << std::endl;
 
     for (auto i{0}; i < threads; ++i){
@@ -63,7 +86,9 @@ void task_1(){
 
 int main(){
 
-    task_1();
+    //task_1();
+
+    std::cout << nthPrime(1000000);
 
     return 0;
 }
