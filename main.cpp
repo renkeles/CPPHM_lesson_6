@@ -4,77 +4,66 @@
 #include <vector>
 #include <chrono>
 
-static std::mutex mtx_cout;
+static std::mutex m;
 
-// Asynchronous output
-struct acout
+struct pcout
 {
         std::unique_lock<std::mutex> lk;
-        acout()
-            :
-              lk(std::unique_lock<std::mutex>(mtx_cout))
-        {
-
-        }
+        pcout() : lk(std::unique_lock<std::mutex>(m)){}
 
         template<typename T>
-        acout& operator<<(const T& _t)
-        {
+        pcout& operator<<(const T& _t){
             std::cout << _t;
             return *this;
         }
 
-        acout& operator<<(std::ostream& (*fp)(std::ostream&))
-        {
+        pcout& operator<<(std::ostream& (*fp)(std::ostream&)){
             std::cout << fp;
             return *this;
         }
 };
 
-int main(void)
-{
+void tJoin(std::vector<std::thread> &workers){
+    for (auto& w : workers){
+        w.join();
+    }
+}
 
-
+void task_1(){
     std::vector<std::thread> workers_cout;
-    std::vector<std::thread> workers_acout;
+    std::vector<std::thread> workers_pcout;
 
-    size_t worker(0);
-    size_t threads(5);
-
+    int worker{0};
+    int threads{5};
 
     std::cout << "With std::cout:" << std::endl;
 
-    for (size_t i = 0; i < threads; ++i)
-    {
-        workers_cout.emplace_back([&]
-        {
-            std::cout << "\tThis is worker " << ++worker << " in thread "
+    for (auto i{0}; i < threads; ++i){
+        workers_cout.emplace_back([&](){
+            std::cout << "This is worker " << ++worker << " in thread "
                       << std::this_thread::get_id() << std::endl;
         });
     }
-    for (auto& w : workers_cout)
-    {
-        w.join();
-    }
+
+    tJoin(workers_cout);
 
     worker = 0;
-
     std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::cout << "With pcout():" << std::endl;
 
-    std::cout << "\nWith acout():" << std::endl;
-
-    for (size_t i = 0; i < threads; ++i)
-    {
-        workers_acout.emplace_back([&]
-        {
-            acout() << "\tThis is worker " << ++worker << " in thread "
+    for (auto i{0}; i < threads; ++i){
+        workers_pcout.emplace_back([&](){
+            pcout() << "This is worker " << ++worker << " in thread "
                     << std::this_thread::get_id() << std::endl;
         });
     }
-    for (auto& w : workers_acout)
-    {
-        w.join();
-    }
+
+    tJoin(workers_pcout);
+}
+
+int main(){
+
+    task_1();
 
     return 0;
 }
