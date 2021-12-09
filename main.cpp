@@ -46,6 +46,7 @@ int nthPrime(int n) {
     int candidate, count;
     for(candidate = 2, count = 0; count < n; ++candidate) {
         if (isPrime(candidate)) {
+            std::cout << candidate << "\t";
             ++count;
         }
     }
@@ -88,7 +89,9 @@ int main(){
 
     //task_1();
 
-    std::cout << nthPrime(1000000);
+    //std::cout << nthPrime(1000000);
+
+
 
     return 0;
 }
