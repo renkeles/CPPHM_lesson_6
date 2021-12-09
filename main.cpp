@@ -4,6 +4,10 @@
 #include <vector>
 #include <chrono>
 #include <cmath>
+#include <random>
+#include <algorithm>
+#include <ctime>
+#include <iterator>
 
 static std::mutex m;
 
@@ -53,6 +57,14 @@ int nthPrime(int n) {
     return candidate-1;
 }
 
+template <class Container>
+void printContainer(Container& container, std::string name) {
+    std::cout << name << std::endl;
+    std::copy(container.begin(), container.end(), std::ostream_iterator<int>(std::cout, "."));
+    std::cout << std::endl;
+}
+
+
 void task_1(){
     std::vector<std::thread> workers_cout;
     std::vector<std::thread> workers_pcout;
@@ -100,6 +112,16 @@ int main(){
     //task_1();
     //task_2();
 
+    const int count = 100;
+
+    std::mt19937 gen(time(0));
+    std::uniform_int_distribution<> urd(0,100);
+    std::vector<int> house(count);
+
+    std::generate(house.begin(), house.end(), [&urd, &gen](){
+        return urd(gen);
+    });
+    printContainer(house, "House");
 
     return 0;
 }
