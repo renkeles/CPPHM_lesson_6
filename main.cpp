@@ -59,7 +59,7 @@ int nthPrime(int n) {
 
 template <class Container>
 void printContainer(Container& container, std::string name) {
-    std::cout << name << std::endl;
+    std::cout << name << ": ";
     std::copy(container.begin(), container.end(), std::ostream_iterator<int>(std::cout, "."));
     std::cout << std::endl;
 }
@@ -122,12 +122,18 @@ int main(){
         return urd(gen);
     });
 
+    for(int i{0}; i < count; ++i){
+        auto newElem = urd(gen);
+        std::cout << "New element: " << newElem << std::endl;
+        house.push_back(newElem);
+        printContainer(house, "House");
+        std::cout << "Size house: " << house.size() << std::endl;
+        auto highScore = std::max_element( house.begin(), house.end() );
+        std::cout << "High score: " << *highScore << std::endl;
+        house.erase(highScore);
+        std::cout << "========================" << std::endl;
+    }
 
-    printContainer(house, "House");
-    std::cout << "Size house: " << house.size() << std::endl;
-    auto highScore = std::max_element( house.begin(), house.end() );
-    std::cout << "High score: " << *highScore << std::endl;
-    house.erase(highScore);
 
 
 
