@@ -85,12 +85,20 @@ void task_1(){
     tJoin(workers_pcout);
 }
 
+void task_2(){
+    int simpleNum = 0;
+    int count = 100; //N-simple
+    std::thread th([&](){
+        simpleNum = nthPrime(count);
+    });
+    th.join();
+    std::cout << "\n" << count << " simpleNum: " << simpleNum;
+}
+
 int main(){
 
     //task_1();
-
-    //std::cout << nthPrime(1000000);
-
+    //task_2();
 
 
     return 0;
