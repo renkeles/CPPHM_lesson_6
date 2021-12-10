@@ -10,6 +10,8 @@
 #include <iterator>
 
 static std::mutex m;
+const int count = 10;
+std::vector<int> vec(count);
 
 struct pcout
 {
@@ -64,6 +66,30 @@ void printContainer(Container& container, std::string name) {
     std::cout << std::endl;
 }
 
+void pushElem(){
+    std::thread::id thread_id = std::this_thread::get_id();
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::mt19937 gen(time(0));
+    std::uniform_int_distribution<> urd(1,99);
+    auto newElem = urd(gen);
+    std::cout << "Thread id = " << thread_id << " ";
+    std::cout << "New element: " << newElem << " ";
+    std::unique_lock<std::mutex>(m);
+    vec.push_back(newElem);
+    printContainer(vec, "Push print: ");
+}
+
+void deleteMaxElem(){
+    std::thread::id thread_id = std::this_thread::get_id();
+    std::this_thread::sleep_for(std::chrono::microseconds (500));
+    auto highScore = std::max_element( vec.begin(), vec.end() );
+    std::cout << "Thread id = " << thread_id << " ";
+    std::cout << "High score: " << *highScore << " ";
+    std::unique_lock<std::mutex>(m);
+    vec.erase(highScore);
+    printContainer(vec, "Delete print: ");
+}
+
 
 void task_1(){
     std::vector<std::thread> workers_cout;
@@ -107,32 +133,37 @@ void task_2(){
     std::cout << "\n" << count << " simpleNum: " << simpleNum;
 }
 
+void task_3(){
+    std::mt19937 gen(time(0));
+    std::uniform_int_distribution<> urd(1,99);
+
+    std::generate(vec.begin(), vec.end(), [&urd, &gen](){
+        return urd(gen);
+    });
+
+
+    for(int i{0}; i < count; ++i){
+        std::thread th1(pushElem);
+        std::thread th2(deleteMaxElem);
+
+        th1.join();
+        th2.join();
+    }
+}
+
+
 int main(){
 
     //task_1();
     //task_2();
+    task_3();
 
-    const int count = 10;
 
-    std::mt19937 gen(time(0));
-    std::uniform_int_distribution<> urd(1,99);
-    std::vector<int> house(count);
 
-    std::generate(house.begin(), house.end(), [&urd, &gen](){
-        return urd(gen);
-    });
 
-    for(int i{0}; i < count; ++i){
-        auto newElem = urd(gen);
-        std::cout << "New element: " << newElem << std::endl;
-        house.push_back(newElem);
-        printContainer(house, "House");
-        std::cout << "Size house: " << house.size() << std::endl;
-        auto highScore = std::max_element( house.begin(), house.end() );
-        std::cout << "High score: " << *highScore << std::endl;
-        house.erase(highScore);
-        std::cout << "========================" << std::endl;
-    }
+
+
+
 
 
 
