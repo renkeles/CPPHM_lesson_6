@@ -99,7 +99,7 @@ void task_1(){
 
 void task_2(){
     int simpleNum = 0;
-    int count = 100; //N-simple
+    int count = 1000000; //N-simple
     std::thread th([&](){
         simpleNum = nthPrime(count);
     });
@@ -107,32 +107,54 @@ void task_2(){
     std::cout << "\n" << count << " simpleNum: " << simpleNum;
 }
 
+class houseVector{
+    std::vector<int> vec;
+    std::mutex hm;
+public:
+    void push(){
+        std::mt19937 gen(time(0));
+        std::uniform_int_distribution<> urd(1,99);
+        std::lock_guard<std::mutex> lg(hm);
+        vec.push_back(urd(gen));
+    }
+
+    void generationHouse(int size){
+        std::mt19937 gen(time(0));
+        std::uniform_int_distribution<> urd(1,99);
+        vec.resize(size);
+        std::lock_guard<std::mutex> lg(hm);
+        std::generate(vec.begin(), vec.end(), [&urd, &gen](){
+            return urd(gen);
+        });
+    }
+
+    void deleteMax(){
+        std::lock_guard<std::mutex> lg(hm);
+        auto highScore = std::max_element( vec.begin(), vec.end() );
+        std::cout << "High score: " << *highScore << std::endl;
+        vec.erase(highScore);
+    }
+
+    void print(){
+        printContainer(vec, "House");
+    }
+};
+
+
 int main(){
 
     //task_1();
     //task_2();
 
-    const int count = 10;
 
-    std::mt19937 gen(time(0));
-    std::uniform_int_distribution<> urd(1,99);
-    std::vector<int> house(count);
+    houseVector hv;
+    hv.generationHouse(10);
+    hv.print();
 
-    std::generate(house.begin(), house.end(), [&urd, &gen](){
-        return urd(gen);
-    });
+    std::thread th1(&houseVector::deleteMax, hv);
+    th1.join();
 
-    for(int i{0}; i < count; ++i){
-        auto newElem = urd(gen);
-        std::cout << "New element: " << newElem << std::endl;
-        house.push_back(newElem);
-        printContainer(house, "House");
-        std::cout << "Size house: " << house.size() << std::endl;
-        auto highScore = std::max_element( house.begin(), house.end() );
-        std::cout << "High score: " << *highScore << std::endl;
-        house.erase(highScore);
-        std::cout << "========================" << std::endl;
-    }
+    hv.print();
 
 
 
