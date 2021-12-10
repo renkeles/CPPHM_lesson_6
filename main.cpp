@@ -10,6 +10,8 @@
 #include <iterator>
 
 static std::mutex m;
+const int count = 10;
+std::vector<int> vec(count);
 
 struct pcout
 {
@@ -64,6 +66,30 @@ void printContainer(Container& container, std::string name) {
     std::cout << std::endl;
 }
 
+void pushElem(){
+    std::thread::id thread_id = std::this_thread::get_id();
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::mt19937 gen(time(0));
+    std::uniform_int_distribution<> urd(1,99);
+    auto newElem = urd(gen);
+    std::cout << "Thread id = " << thread_id << " ";
+    std::cout << "New element: " << newElem << " ";
+    std::unique_lock<std::mutex>(m);
+    vec.push_back(newElem);
+    printContainer(vec, "Push print: ");
+}
+
+void deleteMaxElem(){
+    std::thread::id thread_id = std::this_thread::get_id();
+    std::this_thread::sleep_for(std::chrono::microseconds (500));
+    auto highScore = std::max_element( vec.begin(), vec.end() );
+    std::cout << "Thread id = " << thread_id << " ";
+    std::cout << "High score: " << *highScore << " ";
+    std::unique_lock<std::mutex>(m);
+    vec.erase(highScore);
+    printContainer(vec, "Delete print: ");
+}
+
 
 void task_1(){
     std::vector<std::thread> workers_cout;
@@ -107,32 +133,22 @@ void task_2(){
     std::cout << "\n" << count << " simpleNum: " << simpleNum;
 }
 
-void pushElem(std::vector<int> &vec){
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+void task_3(){
     std::mt19937 gen(time(0));
     std::uniform_int_distribution<> urd(1,99);
-    auto newElem = urd(gen);
-    std::cout << "New element: " << newElem << std::endl;
-    std::unique_lock<std::mutex>(m);
-    vec.push_back(newElem);
-}
 
-void deleteMaxElem(std::vector<int> &vec){
-    std::this_thread::sleep_for(std::chrono::microseconds (500));
-    std::unique_lock<std::mutex>(m);
-    auto highScore = std::max_element( vec.begin(), vec.end() );
-    std::cout << "High score: " << *highScore << std::endl;
-    vec.erase(highScore);
-}
+    std::generate(vec.begin(), vec.end(), [&urd, &gen](){
+        return urd(gen);
+    });
 
-void doSomething(std::vector<int> &vec) {
-    m.lock();
-    std::cout << "start thread " << number << std::endl;
-    m.unlock();
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    m.lock();
-    std::cout << "stop thread " << number << std::endl;
-    m.unlock();
+
+    for(int i{0}; i < count; ++i){
+        std::thread th1(pushElem);
+        std::thread th2(deleteMaxElem);
+
+        th1.join();
+        th2.join();
+    }
 }
 
 
@@ -140,24 +156,15 @@ int main(){
 
     //task_1();
     //task_2();
+    task_3();
 
-    const int count = 10;
 
-    std::mt19937 gen(time(0));
-    std::uniform_int_distribution<> urd(1,99);
-    std::vector<int> house(count);
 
-    std::generate(house.begin(), house.end(), [&urd, &gen](){
-        return urd(gen);
-    });
 
-    //std::thread th1(pushElem, house);
-    //std::thread th2(deleteMaxElem, house);
-    std::thread<> th3(doSomething, house);
 
-    //th1.join();
-    //th2.join();
-    th3.join();
+
+
+
 
 
 
