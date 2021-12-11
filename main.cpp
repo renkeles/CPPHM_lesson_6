@@ -65,7 +65,7 @@ void printContainer(Container& container, std::string name) {
     std::copy(container.begin(), container.end(), std::ostream_iterator<int>(std::cout, "."));
     std::cout << std::endl;
 }
-
+/*
 void pushElem(int count){
     std::thread thread([count](){
         std::thread::id thread_id = std::this_thread::get_id();
@@ -99,7 +99,7 @@ void deleteMaxElem(int count){
     });
     thread.join();
 }
-
+*/
 
 void task_1(){
     std::vector<std::thread> workers_cout;
