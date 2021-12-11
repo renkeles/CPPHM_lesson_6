@@ -192,6 +192,5 @@ int main(){
     //task_2();
     task_3(count);
 
-
     return 0;
 }
