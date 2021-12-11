@@ -169,7 +169,7 @@ void task_3(int count){
     std::thread thread2([count](){
         std::thread::id thread_id = std::this_thread::get_id();
         for(int i{0}; i < count; ++i){
-            std::this_thread::sleep_for(std::chrono::microseconds (500));
+            std::this_thread::sleep_for(std::chrono::milliseconds (500));
             auto highScore = std::max_element( vec.begin(), vec.end() );
             std::cout << "Thread id = " << thread_id << " ";
             std::cout << "High score: " << *highScore << " ";
