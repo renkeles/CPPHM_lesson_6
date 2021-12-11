@@ -66,28 +66,38 @@ void printContainer(Container& container, std::string name) {
     std::cout << std::endl;
 }
 
-void pushElem(){
-    std::thread::id thread_id = std::this_thread::get_id();
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    std::mt19937 gen(time(0));
-    std::uniform_int_distribution<> urd(1,99);
-    auto newElem = urd(gen);
-    std::cout << "Thread id = " << thread_id << " ";
-    std::cout << "New element: " << newElem << " ";
-    std::unique_lock<std::mutex>(m);
-    vec.push_back(newElem);
-    printContainer(vec, "Push print: ");
+void pushElem(int count){
+    std::thread thread([count](){
+        std::thread::id thread_id = std::this_thread::get_id();
+        for(int i{0}; i < count; ++i){
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::mt19937 gen(time(0));
+            std::uniform_int_distribution<> urd(1,99);
+            auto newElem = urd(gen);
+            std::cout << "Thread id = " << thread_id << " ";
+            std::cout << "New element: " << newElem << " ";
+            std::unique_lock<std::mutex>(m);
+            vec.push_back(newElem);
+            printContainer(vec, "Push print: ");
+        }
+    });
+    thread.join();
 }
 
-void deleteMaxElem(){
-    std::thread::id thread_id = std::this_thread::get_id();
-    std::this_thread::sleep_for(std::chrono::microseconds (500));
-    auto highScore = std::max_element( vec.begin(), vec.end() );
-    std::cout << "Thread id = " << thread_id << " ";
-    std::cout << "High score: " << *highScore << " ";
-    std::unique_lock<std::mutex>(m);
-    vec.erase(highScore);
-    printContainer(vec, "Delete print: ");
+void deleteMaxElem(int count){
+    std::thread thread([count](){
+        std::thread::id thread_id = std::this_thread::get_id();
+        for(int i{0}; i < count; ++i){
+            std::this_thread::sleep_for(std::chrono::microseconds (500));
+            auto highScore = std::max_element( vec.begin(), vec.end() );
+            std::cout << "Thread id = " << thread_id << " ";
+            std::cout << "High score: " << *highScore << " ";
+            std::unique_lock<std::mutex>(m);
+            vec.erase(highScore);
+            printContainer(vec, "Delete print: ");
+        }
+    });
+    thread.join();
 }
 
 
@@ -133,7 +143,7 @@ void task_2(){
     std::cout << "\n" << count << " simpleNum: " << simpleNum;
 }
 
-void task_3(){
+void task_3(int count){
     std::mt19937 gen(time(0));
     std::uniform_int_distribution<> urd(1,99);
 
@@ -141,14 +151,38 @@ void task_3(){
         return urd(gen);
     });
 
+    std::thread thread1([count](){
+        std::thread::id thread_id = std::this_thread::get_id();
+        for(int i{0}; i < count; ++i){
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::mt19937 gen(time(0));
+            std::uniform_int_distribution<> urd(1,99);
+            auto newElem = urd(gen);
+            std::cout << "Thread id = " << thread_id << " ";
+            std::cout << "New element: " << newElem << " ";
+            std::unique_lock<std::mutex>(m);
+            vec.push_back(newElem);
+            printContainer(vec, "Push print: ");
+        }
+    });
 
-    for(int i{0}; i < count; ++i){
-        std::thread th1(pushElem);
-        std::thread th2(deleteMaxElem);
+    std::thread thread2([count](){
+        std::thread::id thread_id = std::this_thread::get_id();
+        for(int i{0}; i < count; ++i){
+            std::this_thread::sleep_for(std::chrono::microseconds (500));
+            auto highScore = std::max_element( vec.begin(), vec.end() );
+            std::cout << "Thread id = " << thread_id << " ";
+            std::cout << "High score: " << *highScore << " ";
+            std::unique_lock<std::mutex>(m);
+            vec.erase(highScore);
+            printContainer(vec, "Delete print: ");
+        }
+    });
 
-        th1.join();
-        th2.join();
-    }
+
+    thread1.join();
+    thread2.join();
+
 }
 
 
@@ -156,18 +190,7 @@ int main(){
 
     //task_1();
     //task_2();
-    task_3();
-
-
-
-
-
-
-
-
-
-
-
+    task_3(count);
 
 
     return 0;
